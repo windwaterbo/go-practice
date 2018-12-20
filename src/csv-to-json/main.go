@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -9,12 +10,12 @@ import (
 	"strings"
 )
 
-type candidate struct {
-	name    string
-	gender  string
-	birth   string
-	job     string
-	company string
+type Candidate struct {
+	Name    string
+	Gender  string
+	Birth   string
+	Job     string
+	Company string
 }
 
 func Close(c io.Closer) {
@@ -24,10 +25,11 @@ func Close(c io.Closer) {
 	}
 }
 
-func CsvToMap(filename string) ([]candidate, error) {
+func CsvToStruct(filename string) ([]Candidate, error) {
 	// init variables
 	var (
-		candidates []candidate
+		candidates []Candidate
+		cand       Candidate
 		err        error
 	)
 	f, err := os.Open(filename)
@@ -44,13 +46,12 @@ func CsvToMap(filename string) ([]candidate, error) {
 		s := strings.Split(line, ",")
 
 		if s != nil {
-			candidates = append(candidates, candidate{
-				name:    s[0],
-				gender:  s[1],
-				birth:   s[2],
-				job:     s[3],
-				company: s[4],
-			})
+			cand.Name = s[0]
+			cand.Gender = s[1]
+			cand.Birth = s[2]
+			cand.Job = s[3]
+			cand.Company = s[4]
+			candidates = append(candidates, cand)
 		}
 		line, err = r.ReadString('\n')
 	}
@@ -65,13 +66,12 @@ func CsvToMap(filename string) ([]candidate, error) {
 
 func main() {
 	fmt.Println("hihi")
-	result, err := CsvToMap("data.csv")
-	if result != nil {
-		fmt.Println("======result=======")
-		fmt.Println(result)
-	}
+	m, _ := CsvToStruct("data.csv")
+	fmt.Println(m)
+	jsonData, err := json.Marshal(m)
 	if err != nil {
-		fmt.Println("=======err=========")
 		fmt.Println(err)
+		os.Exit(1)
 	}
+	fmt.Println(string(jsonData))
 }
